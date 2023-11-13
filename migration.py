@@ -89,6 +89,12 @@ class GitlabClient:
         req = self.cli.projects.get(project)
         return req
 
+    def archived_project(self, project):
+        req = self.cli.projects.get(project)
+        id = req.get_id()
+        url = f'/projects/{id}/archive'
+        self.request(url, 'POST')
+
     def get_import_project_status(self, project):
         req = self.get_project(project)
         return req.import_status
@@ -151,6 +157,7 @@ def migrate_group(group):
 def migrate_project(project):
     dest = GitlabClient(gitlab_config['dest'])
     src = GitlabClient(gitlab_config['src'])
+    src.archived_project(project['src'])
     if dest.is_project_exited(project['dest']):
         return f'Skipping! {project} is exited.'
     print(f'Start migrate project: {project}.')
